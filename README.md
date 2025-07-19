@@ -6,17 +6,21 @@
     - [TailWind](#tailwind)
     - [CSS Modules](#css-modules)
     - [Using the clsx library to toggle class names](#using-the-clsx-library-to-toggle-class-names)
-    - [✅ **What is `clsx`?**](#-what-is-clsx)
-    - [🚀 **Common Use Cases:**](#-common-use-cases)
   - [Optimizing Fonts and Images](#optimizing-fonts-and-images)
     - [Why optimize fonts?](#why-optimize-fonts)
       - [Adding a primary font](#adding-a-primary-font)
     - [Why optimize images?](#why-optimize-images)
-    - [The  component](#the--component)
+    - [The `<Image>` component](#the-image-component)
   - [Create Nested Routing](#create-nested-routing)
     - [Create Layout](#create-layout)
       - [Root Layout](#root-layout)
     - [🧱 What is a **Root Layout** in Next.js?](#-what-is-a-root-layout-in-nextjs)
+  - [Navigation Between Pages](#navigation-between-pages)
+    - [🔄 Why Optimize Navigation?](#-why-optimize-navigation)
+      - [What’s Wrong with Full Page Reloads?](#whats-wrong-with-full-page-reloads)
+      - [The Better Way: `<Link>` in Next.js](#the-better-way-link-in-nextjs)
+      - [Why Is Navigation with  So Fast?](#why-is-navigation-with--so-fast)
+    - [Showing Active Links `usePathname`](#showing-active-links-usepathname)
   - [Community Standarts](#community-standarts)
   - [Need to look at](#need-to-look-at)
 
@@ -51,7 +55,7 @@ In Tailwind, you style elements by adding class names. For example, adding "text
 
 
 ```jsx
-<h1 className="text-blue-500">I'm blue!</h1>
+```<h1 className="text-blue-500">I'm blue!</h1>```
 ```
 Although the CSS styles are shared globally, each class is singularly applied to each element. This means if you add or delete an element, you don't have to worry about maintaining separate stylesheets, style collisions, or the size of your CSS bundle growing as your application scales.
 
@@ -63,17 +67,12 @@ CSS Modules allow you to **scope CSS to a component** by automatically creating 
 > you should create a file with name `componentName.module.css`
 
 ### Using the clsx library to toggle class names
-Sure! Here's a **short summary** of `clsx` and its use cases:
 
----
-
-### ✅ **What is `clsx`?**
 
 `clsx` is a tiny utility for **conditionally combining class names** — cleanly handles strings, arrays, objects, and falsy values.
 
----
 
-### 🚀 **Common Use Cases:**
+Common Use Cases:
 
 1. **Conditional Classes**
 
@@ -113,9 +112,9 @@ Next.js automatically optimizes fonts in the application when you use the `next/
 #### Adding a primary font
 In your `/app/ui` folder, create a new file called fonts.ts. You'll use this file to keep the fonts that will be used throughout your application.
 
-[Adding multiple Fonts ](https://nextjs.org/docs/app/getting-started/fonts#using-multiple-fonts)
+[Adding multiple Fonts ](https://nextjs.org/docs/app/getting-started/fonts#using-multiple-fonts) [ ] 
 
-[Full list of options](https://nextjs.org/docs/app/api-reference/components/font#font-function-arguments)
+[Full list of options](https://nextjs.org/docs/app/api-reference/components/font#font-function-arguments) [ ]
 
 
 
@@ -144,7 +143,7 @@ With regular HTML, you would add an image as follows:
 
 Image Optimization is a large topic in web development that could be considered a specialization in itself. Instead of manually implementing these optimizations, you can use the `next/image` component to automatically optimize your images.
 
-### The <Image> component
+### The `<Image>` component
 The `<Image>` Component is an extension of the HTML `<img>` tag, and comes with automatic image optimization, such as:
 
 - Preventing layout shift automatically when images are loading.
@@ -198,6 +197,8 @@ You can create separate UIs for each route using `layout.tsx` and `page.tsx` fil
 
 > One benefit of using layouts in Next.js is that on navigation, only the page components update while the layout won't re-render. This is called partial rendering which preserves client-side React state in the layout when transitioning between pages.
 ![alt text](image-3.png)
+
+
 [ ] [Partial Rendering 🔥](https://nextjs.org/docs/app/getting-started/linking-and-navigating#4-partial-rendering)
 
 
@@ -233,10 +234,76 @@ You can create separate UIs for each route using `layout.tsx` and `page.tsx` fil
 
 
 
+## Navigation Between Pages 
+
+
+### 🔄 Why Optimize Navigation?
+
+In traditional websites, you navigate between pages using the regular `<a>` HTML element. But when we use `<a>` HTML element each time you click a link, the entire page **refreshes**. This is called a **full page reload** — and it’s something we want to avoid in modern web apps.
+
+#### What’s Wrong with Full Page Reloads?
+
+When the browser does a full page reload:
+
+* It **re-downloads** the entire HTML, CSS, and JavaScript
+* It **re-initializes React**
+* It **clears any app state** (like form inputs or scroll position)
+* It **feels slow and less smooth**
+
+which  leads to a poor user experience.
 
 
 
+####  The Better Way: [`<Link>`](https://nextjs.org/docs/app/api-reference/components/link) in Next.js
 
+Next.js provides a special `<Link>` component that enables **fast, client-side navigation** — without a full reload.
+
+Here’s how you use it:
+
+```tsx
+import Link from 'next/link';
+
+<Link href="/invoices">Invoices</Link>
+```
+
+With this, only the necessary content updates, and your app feels smooth and responsive — like a true single-page application (SPA).
+
+
+
+| <!--             | Traditional `<a>`       | Next.js `<Link>` |
+| ---------------- | ----------------------- |
+| Full page reload | No reload, fast updates |
+| Loses state      | Keeps state             |
+| Feels slow       | Feels like an app       |
+
+--- -->
+
+#### Why Is Navigation with <Link> So Fast?
+Next.js automatically improves your app with:
+
+1. Automatic Code-Splitting
+Your app is split into smaller bundles — one for each page.
+
+This means users only download the code they need for the current page.
+
+Other pages are loaded on demand, not all at once.
+
+If a page crashes, the rest of the app keeps working.
+
+➡️ Result: Faster load times and better performance.
+
+2. Automatic Prefetching
+In production, when a <Link> appears on screen (in the viewport), Next.js automatically prefetches the linked page in the background.
+
+So when the user clicks it, the page is already loaded — making transitions feel instant.
+
+➡️ Result: Super smooth, app-like navigation.
+
+### Showing Active Links `usePathname`
+A common UI pattern is to show an active link to indicate to the user what page they are currently on. To do this, you need to get the user's current path from the URL. Next.js provides a hook called `usePathname` that you can use to check the path and implement this pattern.
+
+
+> ‼️This React hook only works in a client component so you'll need to turn the component that use to client component by adding `use client`  directive to the top of the file
 
 ## Community Standarts 
 
@@ -284,3 +351,6 @@ Why are pages and routes lowercase only in Next.js?
 ## Need to look at 
 
 [ ] [How Core Web Vitals affect SEO](https://vercel.com/blog/how-core-web-vitals-affect-seo)
+
+
+[ docs](https://nextjs.org/docs/app/getting-started/installation)
