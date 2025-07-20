@@ -21,8 +21,22 @@
       - [The Better Way: `<Link>` in Next.js](#the-better-way-link-in-nextjs)
       - [Why Is Navigation with  So Fast?](#why-is-navigation-with--so-fast)
     - [Showing Active Links `usePathname`](#showing-active-links-usepathname)
+  - [Fetching Data](#fetching-data)
+    - [API layer](#api-layer)
+    - [Database queries](#database-queries)
+      - [Using sql](#using-sql)
+    - [Request Waterfall.](#request-waterfall)
+      - [Parallel data fetching](#parallel-data-fetching)
+      - [Static and Dynamic Rendering](#static-and-dynamic-rendering)
+        - [Static Rendering (SSG || ISR)](#static-rendering-ssg--isr)
+        - [Dynamic Rendering (SSR)?](#dynamic-rendering-ssr)
+    - [](#)
+    - [](#-1)
+    - [](#-2)
   - [Community Standarts](#community-standarts)
   - [Need to look at](#need-to-look-at)
+    - [Next.js Server vs Client Components ||  React Server Components. read it then add it to the notes above](#nextjs-server-vs-client-components---react-server-components-read-it-then-add-it-to-the-notes-above)
+  - [Packages](#packages)
 
 # Next.js App Router Course - Starter
 
@@ -305,6 +319,117 @@ A common UI pattern is to show an active link to indicate to the user what page 
 
 > ‼️This React hook only works in a client component so you'll need to turn the component that use to client component by adding `use client`  directive to the top of the file
 
+
+
+## Fetching Data 
+<!-- 
+Learn about some approaches to fetching data: APIs, ORMs, SQL, etc.
+
+How Server Components can help you access back-end resources more securely.
+
+What network waterfalls are.
+
+How to implement parallel data fetching using a JavaScript Pattern. 
+-->
+
+
+
+### API layer
+APIs are an intermediary layer between your application code and database. There are a few cases where you might use an API:
+- If you're using third-party services that provide an API.
+- If you're fetching data from the client, you want to have an API layer that runs on the server to avoid exposing your database secrets to the client.
+
+
+you can create API endpoints using
+[ ] [Route Handlers](https://nextjs.org/docs/app/api-reference/file-conventions/route) 
+
+### Database queries
+When you're creating a full-stack application, you'll also need to write logic to interact with your database. For relational databases like Postgres, you can do this with SQL or with an ORM.
+
+There are a few cases where you have to write database queries:
+
+- When creating your API endpoints, you need to write logic to interact with your database.
+- If you are using React Server Components (fetching data on the server), you can skip the API layer, and query your database directly without risking exposing your database secrets to the client.
+ 
+ <!-- If YOU are writing the backend (like using Prisma, PostgreSQL, etc.):
+You can skip creating an API and directly talk to your DB inside a Server Component.
+
+This is possible only on the server, so no secrets (like DB credentials) are exposed to the clien -->
+#### Using sql 
+There are a few reasons why we'll be using SQL:
+
+- SQL is the industry standard for querying relational databases (e.g. ORMs generate SQL under the hood).
+- Having a basic understanding of SQL can help you understand the fundamentals of relational databases, allowing you to apply your knowledge to other tools.
+- SQL is versatile, allowing you to fetch and manipulate specific data.
+- The postgres.js library provides protection against SQL injections.
+
+
+
+> ⚠️However... while fetching data there are two things you need to be aware of:
+  - The data requests are unintentionally blocking each other, creating a request waterfall.
+  - By default, Next.js **prerenders routes to improve performance, this is called Static Rendering**.**So if your data changes, it won't be reflected in your dashboard**.
+### Request Waterfall.
+A "waterfall" refers to a sequence of network requests that depend on the completion of previous requests. In the case of data fetching, each request can only begin once the previous request has returned data.
+![alt text](image-4.png)
+This pattern is not necessarily bad. There may be cases where you want waterfalls because you want a condition to be satisfied before you make the next request. For example, you might want to fetch a user's ID and profile information first. Once you have the ID, you might then proceed to fetch their list of friends. In this case, each request is contingent on the data returned from the previous request.
+
+
+⚠️ this behavior can also be unintentional and impact performance.
+
+#### Parallel data fetching 
+A common way to avoid waterfalls is to initiate all data requests at the same time - in parallel.
+
+In JavaScript, you can use the `Promise.all()` or `Promise.allSettled()` functions to initiate all promises at the same time
+![alt text](image-5.png)
+
+**By using this pattern, you can:**
+
+- Start executing all data fetches at the same time, which is faster than waiting for each request to complete in a waterfall.
+- Use a native JavaScript pattern that can be applied to any library or framework.
+**However, there is one disadvantage of relying only on this JavaScript pattern: what happens if one data request is slower than all the others???**
+
+
+
+#### Static and Dynamic Rendering                              
+In the previous chapter, you fetched data for the Dashboard Overview page. However, we briefly discussed two limitations of the current setup:
+
+- The data requests are creating an unintentional waterfall.
+- The dashboard is static, so any data updates will not be reflected on your application.
+
+##### Static Rendering (SSG || ISR)
+
+With static rendering, data fetching and rendering happens on the server at build time (when you deploy) or when [revalidating data](https://nextjs.org/docs/app/getting-started/fetching-data#revalidating-data).
+
+Whenever a user visits your application, the cached result is served. There are a couple of benefits of **static rendering**:
+
+- Faster Websites - Prerendered content can be cached and globally distributed when deployed to platforms like Vercel. This ensures that users around the world can access your website's content more quickly and reliably.
+- 
+- Reduced Server Load - Because the content is cached, your server does not have to dynamically generate content for each user request. This can reduce compute costs.
+- 
+- SEO - Prerendered content is easier for search engine crawlers to index, as the content is already available when the page loads. This can lead to improved search engine rankings.
+  
+Static rendering is useful for UI with *no data* or *data that is shared across users*, such as a static blog post or a product page. It might not be a good fit for a dashboard that has personalized data which is regularly updated.
+
+##### Dynamic Rendering (SSR)?
+With dynamic rendering, *content is rendered on the server* **for each user at request time** (when the user visits the page). There are a couple of benefits of dynamic rendering:
+
+- Real-Time Data - Dynamic rendering allows your application to display real-time or frequently updated data. This is ideal for applications where data changes often.
+  
+- User-Specific Content - It's easier to serve personalized content, such as dashboards or user profiles, and update the data based on user interaction.
+  
+- Request Time Information - Dynamic rendering allows you to access information that can only be known at request time, such as cookies or the URL search parameters.
+
+
+> With dynamic rendering, **your application is only as fast as your slowest data fetch**
+
+
+###
+###
+###
+
+
+
+
 ## Community Standarts 
 
 **Next.js Naming Conventions (with TypeScript)**
@@ -354,3 +479,28 @@ Why are pages and routes lowercase only in Next.js?
 
 
 [ docs](https://nextjs.org/docs/app/getting-started/installation)
+
+[ ] [Neon serverless driver](https://neon.com/docs/serverless/serverless-driver) 
+
+<!-- What the meaning of server less  -->
+
+###  Next.js Server vs Client Components ||  React Server Components. read it then add it to the notes above
+By default, all components in Next.js are Server Components, unless you add 'use client'.
+
+- Server Components run on the server — ideal for data fetching and performance.
+- Server Components support JavaScript Promises, providing a solution for asynchronous tasks like data fetching natively. You can use async/await syntax without needing useEffect, useState or other data fetching libraries.
+- Server Components run on the server, so you can keep expensive data fetches and logic on the server, only sending the result to the client.
+
+If you're using a backend API (like Swagger) provided by your team:
+
+You call the API, not the database directly.
+
+You can call it in a Server Component (runs on server) or a Client Component (runs in browser).
+
+Use 'use client' only when you need interactivity (like buttons, forms, useState, etc.).
+
+If you're building the backend yourself, you can skip API calls and query the database directly inside Server Components.
+
+
+## Packages 
+https://github.com/porsager/postgres
