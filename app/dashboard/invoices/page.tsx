@@ -1,9 +1,13 @@
 
 
 function page() {
+ setTimeout(() => {
   return (
-    <p>Invoices Page ubey</p>
+    <p>
+      hello ubeey from invoices
+    </p>
   )
+ }, 8000);
 }
 
 export default page

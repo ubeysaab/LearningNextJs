@@ -30,9 +30,13 @@
       - [Static and Dynamic Rendering](#static-and-dynamic-rendering)
         - [Static Rendering (SSG || ISR)](#static-rendering-ssg--isr)
         - [Dynamic Rendering (SSR)?](#dynamic-rendering-ssr)
-    - [](#)
-    - [](#-1)
-    - [](#-2)
+  - [Streaming](#streaming)
+    - [Streaming a whole page with `loading.tsx`](#streaming-a-whole-page-with-loadingtsx)
+      - [Adding loading skeletons](#adding-loading-skeletons)
+        - [Fixing the loading skeleton bug with route groups](#fixing-the-loading-skeleton-bug-with-route-groups)
+    - [Streaming a Component](#streaming-a-component)
+      - [Grouping components](#grouping-components)
+    - [Deciding where to place your Suspense boundaries](#deciding-where-to-place-your-suspense-boundaries)
   - [Community Standarts](#community-standarts)
   - [Need to look at](#need-to-look-at)
     - [Next.js Server vs Client Components ||  React Server Components. read it then add it to the notes above](#nextjs-server-vs-client-components---react-server-components-read-it-then-add-it-to-the-notes-above)
@@ -422,11 +426,98 @@ With dynamic rendering, *content is rendered on the server* **for each user at r
 
 > With dynamic rendering, **your application is only as fast as your slowest data fetch**
 
+> The Slow data fetch will make your first loading very slowbecause its blocking you whole page  which will  cause a terrible UX so look at Streaming
 
-###
-###
-###
 
+## Streaming 
+Streaming is a data transfer technique that allows you to break down a route into smaller "chunks" and progressively stream them from the server to the client as they become ready.
+
+![alt text](image-6.png)
+
+**By streaming, you can prevent slow data requests from blocking your whole page. This allows the user to see and interact with parts of the page without waiting for all the data to load before any UI can be shown to the user.**
+
+![alt text](image-7.png)
+
+### Streaming a whole page with `loading.tsx`
+Streaming works well with React's component model, as each component can be considered a chunk.
+
+There are two ways you implement streaming in Next.js:
+
+1. At the page level, with the `loading.tsx` file (which creates `<Suspense>` for you).
+   
+2. At the component level, with `<Suspense>` for more granular control.
+![alt text](image-8.png)
+
+A few things are happening here:
+
+- `loading.tsx` is a special Next.js file built on top of React Suspense. It allows you to create fallback UI to show as a replacement while page content loads.
+  
+- Since <SideNav> is static, it's shown immediately. The user can interact with <SideNav> while the dynamic content is loading.
+  
+- The user doesn't have to wait for the page to finish loading before navigating away (this is called **interruptable navigation**).
+
+
+
+#### Adding loading skeletons
+<!-- chapter 9 -->
+A loading skeleton is a simplified version of the UI. Many websites use them as a placeholder (or fallback) to indicate to users that the content is loading. Any UI you add in `loading.tsx` will be embedded as part of the static file, and sent first. Then, the rest of the dynamic content will be streamed from the server to the client.
+
+
+##### Fixing the loading skeleton bug with route groups
+Right now, your loading skeleton will apply to the invoices.
+
+Since `loading.tsx` is a level higher than `/invoices/page.tsx` and `/customers/page.tsx` in the file system, it's also applied to those pages.
+
+We can change this with Route Groups. Create a new folder called `/(overview)` inside the dashboard folder. Then, move your `loading.tsx` and `page.tsx` files inside the folder:
+
+![alt text](image-9.png)
+
+Now, the `loading.tsx` file will only apply to your dashboard overview page.
+
+[Route groups](https://nextjs.org/docs/app/api-reference/file-conventions/route-groups) allow you to organize files into logical groups **without affecting the URL path** structure. When you create a new folder using **parentheses ()**, **the name won't be included in the URL path**. So `/dashboard/(overview)/page.tsx` becomes `/dashboard`.
+
+Here, you're using a route group to ensure loading.tsx only applies to your dashboard overview page. However, you can also use route groups to separate your application into sections (e.g. (marketing) routes and (shop) routes) or by teams for larger applications.
+
+
+### Streaming a Component
+So far, you're streaming a whole page. But you can also be more granular and stream specific components using React Suspense.
+
+Suspense allows you to defer rendering parts of your application until some condition is met (e.g. data is loaded). You can wrap your dynamic components in Suspense. Then, pass it a fallback component to show while the dynamic component loads
+
+**To do so, you'll need to move the data fetch to the component**, 
+
+#### Grouping components
+ now you need to wrap the <Card> components in Suspense. You can fetch data for each individual card, but this could lead to a popping effect as the cards load in, this can be visually jarring for the user.
+
+So, how would you tackle this problem?
+
+To create more of a staggered effect, `you can group the cards using a wrapper component`. This means the static <SideNav/> will be shown first, followed by the cards, etc.
+
+
+>  You can use this pattern when you want multiple components to load in at the same time.
+
+
+
+### Deciding where to place your Suspense boundaries
+
+
+
+Where you place your Suspense boundaries will depend on a few things:
+
+- How you want the user to experience the page as it streams.
+- What content you want to prioritize.
+- If the components rely on data fetching.
+  
+Take a look at your dashboard page, is there anything you would've done differently?
+
+Don't worry. There isn't a right answer.
+
+- You could stream the whole page like we did with loading.tsx... but that may lead to a longer loading time if one of the components has a slow data fetch.
+  
+- You could stream every component individually... but that may lead to UI popping into the screen as it becomes ready.
+  
+- You could also create a staggered effect by streaming page sections. But you'll need to create wrapper components.
+Where you place your suspense boundaries will vary depending on your application. In general, **it's good practice to move your data fetches down to the components that need it** , and **then wrap those components in Suspense. But there is nothing wrong with streaming the sections or the whole page if that's what your application needs**.
 
 
 
