@@ -37,6 +37,9 @@
     - [Streaming a Component](#streaming-a-component)
       - [Grouping components](#grouping-components)
     - [Deciding where to place your Suspense boundaries](#deciding-where-to-place-your-suspense-boundaries)
+  - [Partial PreRendering (PPR)](#partial-prerendering-ppr)
+  - [Search and Pagination](#search-and-pagination)
+    - [Adding Search Functionality](#adding-search-functionality)
   - [Community Standarts](#community-standarts)
   - [Need to look at](#need-to-look-at)
     - [Next.js Server vs Client Components ||  React Server Components. read it then add it to the notes above](#nextjs-server-vs-client-components---react-server-components-read-it-then-add-it-to-the-notes-above)
@@ -466,9 +469,12 @@ A loading skeleton is a simplified version of the UI. Many websites use them as 
 ##### Fixing the loading skeleton bug with route groups
 Right now, your loading skeleton will apply to the invoices.
 
-Since `loading.tsx` is a level higher than `/invoices/page.tsx` and `/customers/page.tsx` in the file system, it's also applied to those pages.
+Since `loading.tsx` is a level higher than `/invoices/page.tsx` and `/customers/page.tsx` in the file system, it's also applied to those pages.  But we only want the loading screen to show on the main overview page (i.e. /dashboard/page.tsx), not on every subpage.
 
-We can change this with Route Groups. Create a new folder called `/(overview)` inside the dashboard folder. Then, move your `loading.tsx` and `page.tsx` files inside the folder:
+To fix this, we’ll use a special feature in Next.js called Route Groups. Which let us ortganize our files **without changing the URL**
+
+
+ Create a new folder called `/(overview)` inside the dashboard folder. Then, move your `loading.tsx` and `page.tsx` files inside the folder:
 
 ![alt text](image-9.png)
 
@@ -476,7 +482,7 @@ Now, the `loading.tsx` file will only apply to your dashboard overview page.
 
 [Route groups](https://nextjs.org/docs/app/api-reference/file-conventions/route-groups) allow you to organize files into logical groups **without affecting the URL path** structure. When you create a new folder using **parentheses ()**, **the name won't be included in the URL path**. So `/dashboard/(overview)/page.tsx` becomes `/dashboard`.
 
-Here, you're using a route group to ensure loading.tsx only applies to your dashboard overview page. However, you can also use route groups to separate your application into sections (e.g. (marketing) routes and (shop) routes) or by teams for larger applications.
+<!-- , you're using a route group to ensure loading.tsx only applies to your dashboard overview page. However, you can also use route groups to separate your application into sections (e.g. (marketing) routes and (shop) routes) or by teams for larger applications. -->
 
 
 ### Streaming a Component
@@ -519,6 +525,73 @@ Don't worry. There isn't a right answer.
 - You could also create a staggered effect by streaming page sections. But you'll need to create wrapper components.
 Where you place your suspense boundaries will vary depending on your application. In general, **it's good practice to move your data fetches down to the components that need it** , and **then wrap those components in Suspense. But there is nothing wrong with streaming the sections or the whole page if that's what your application needs**.
 
+
+
+## Partial PreRendering (PPR)
+[ ] [PPR](https://nextjs.org/learn/dashboard-app/partial-prerendering) is only available with the Next.js canary releases (next@canary), not in the stable version of Next.js
+
+## Search and Pagination
+
+ *search functionality* will span the client and the server. When a user searches for an invoice on the client, the *URL params* will be updated, data will be fetched on the server, and the table will re-render on the server with the new data.
+ > This pattern may be new if you're used to doing it with client side state.
+ **Why use URL search params**
+ There are a couple of benefits of implementing search with URL params:
+
+- Bookmarkable and shareable URLs: Since the search parameters are in the URL, users can bookmark the current state of the application, including their search queries and filters, for future reference or sharing.
+
+- Server-side rendering: URL parameters can be directly consumed on the server to render the initial state, making it easier to handle server rendering.
+
+- Analytics and tracking: Having search queries and filters directly in the URL makes it easier to track user behavior without requiring additional client-side logic.
+ 
+ ### Adding Search Functionality 
+ <!-- todo : Chapter 11 -->
+ These are the Next.js client hooks that you'll use to implement the search functionality:
+
+- `useSearchParams`- Allows you to access the parameters of the current URL. For example, the search params for this URL /dashboard/invoices?page=1&query=pending would look like this: {page: '1', query: 'pending'}.
+  
+- `usePathname` - Lets you read the current URL's pathname. For example, for the route /dashboard/invoices, usePathname would return '/dashboard/invoices'.
+  
+- `useRouter` - Enables navigation between routes within client components programmatically. There are [multiple methods](https://nextjs.org/docs/app/api-reference/functions/use-router#userouter) you can use.
+
+> "use client" - This is a Client Component, which means you can use event listeners and hooks. 
+
+
+
+
+**`defaultValue` vs. `value` / Controlled vs. Uncontrolled**
+
+If you're using state to manage the value of an input, you'd use the `value` attribute to make it a controlled component. This means React would manage the input's state.
+
+However, since you're not using state, you can use `defaultValue`. This means the native input will manage its own state. This is okay since you're saving the search query to the URL instead of state.
+
+
+
+**When to use the useSearchParams() hook vs. the searchParams prop?**
+
+You might have noticed you used two different ways to extract search params. Whether you use one or the other depends on whether you're working on the client or the server.
+
+- `<Search>` is a Client Component, so you used the `useSearchParams()` hook to access the params from the client.
+
+- `<Table>` is a Server Component that fetches its own data, so you can pass the `searchParams` prop from the page to the component.
+- 
+> As a general rule, if you want to read the params from the client, use the `useSearchParams()` hook as this avoids having to go back to the server.
+
+
+
+
+<!-- 
+? Here's a quick overview of the implementation steps:
+
+Capture the user's input.
+Update the URL with the search params.
+Keep the URL in sync with the input field.
+Update the table to reflect the search query.
+
+ -->
+
+ [ ] [Dynamic Route Segments](https://nextjs.org/docs/app/api-reference/file-conventions/dynamic-routes)
+
+ [ ] [page.js props](https://nextjs.org/docs/app/api-reference/file-conventions/page)
 
 
 ## Community Standarts 
