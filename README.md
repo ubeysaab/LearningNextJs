@@ -43,6 +43,13 @@
     - [Adding Search Functionality](#adding-search-functionality)
       - [Debouncing](#debouncing)
     - [Pagination](#pagination)
+  - [Mutating Data](#mutating-data)
+    - [Server Actions](#server-actions)
+      - [Create Server Action](#create-server-action)
+      - [Extract the data from `formData`](#extract-the-data-from-formdata)
+    - [Validate and Prepare the Data](#validate-and-prepare-the-data)
+      - [Zod (Type Validation and Coercion)](#zod-type-validation-and-coercion)
+      - [Revalidate and redirect  `revalidatePath`](#revalidate-and-redirect--revalidatepath)
   - [Community Standarts](#community-standarts)
   - [Need to look at](#need-to-look-at)
     - [Next.js Server vs Client Components ||  React Server Components. read it then add it to the notes above](#nextjs-server-vs-client-components---react-server-components-read-it-then-add-it-to-the-notes-above)
@@ -624,6 +631,103 @@ In the work that you're have done until now you're **updating the URL on every k
 <!-- chapter 11 -->
 
 handled search and pagination with **URL search parameters**instead of **client state**.
+
+
+
+
+
+
+
+
+
+
+## Mutating Data 
+<!-- chapter 12 -->
+### Server Actions 
+React Server Actions allow you to run asynchronous code directly on the server. They eliminate the need to create API endpoints to mutate your data. Instead, you write asynchronous functions that execute on the server and can be invoked from your Client or Server Components.
+
+Security is a top priority for web applications, as they can be vulnerable to various threats. This is where Server Actions come in. They include features like encrypted closures, strict input checks, error message hashing, host restrictions, and more — all working together to significantly enhance your application security.
+
+> An advantage of invoking a Server Action within a Server Component is progressive enhancement - forms work even if JavaScript has not yet loaded on the client. For example, without slower internet connections.
+
+
+
+
+
+
+
+
+
+Server Actions are also deeply integrated with Next.js caching. When a form is submitted through a Server Action, not only can you use the action to mutate data, but you can also revalidate the associated cache using APIs like `revalidatePath` and `revalidateTag`.
+<!-- 
+- Create a form to capture the user's input.
+- Create a Server Action and invoke it from the form.
+- Inside your Server Action, extract the data from the formData object.
+- Validate and prepare the data to be inserted into your database.
+- Insert the data and handle any errors.
+- Revalidate the cache and redirect the user back to invoices page. 
+-->
+
+#### Create Server Action 
+**Good to know:** In HTML, you'd pass a URL to the action attribute. This URL would be the destination where your form data should be submitted (usually an API endpoint).
+
+However, in React, the action attribute is considered a special prop - meaning React builds on top of it to allow actions to be invoked.
+
+Behind the scenes, Server Actions create a POST API endpoint. This is why you don't need to create API endpoints manually when using Server Actions.
+
+
+#### Extract the data from `formData`
+**Tip:** If you're working with forms that have many fields, you may want to consider using the `entries()` method with JavaScript's `Object.fromEntries()`.
+
+
+### Validate and Prepare the Data
+Before sending the form data to your database, you want *to ensure it's in the correct format and with the correct types*. If you remember from earlier in the course, your invoices table expects data in the following format:
+```ts
+export type Invoice = {
+  id: string; // Will be created on the database
+  customer_id: string;
+  amount: number; // Stored in cents
+  status: 'pending' | 'paid';
+  date: string;
+};
+```
+#### Zod (Type Validation and Coercion)
+It's important to validate that the *data from your form aligns with the expected types in your database*. For instance, if you add a console.log inside your action:
+```js
+console.log(typeof rawFormData.amount); // the type of amount here is "string" and not "number" as the database waiting and this is because input element return a string
+```
+To handle type validation, you have a few options. While you can manually validate types, using a type validation library can save you time and effort
+
+ Zod, a TypeScript-first validation library 
+
+#### Revalidate and redirect  `revalidatePath`
+
+
+
+Next.js has a **client-side router cache that stores the route segments in the user's browser for a time**. Along with [prefetching](https://nextjs.org/docs/app/getting-started/linking-and-navigating#prefetching), this cache ensures that users can quickly navigate between routes while reducing the number of requests made to the server.
+
+
+
+Since you're updating the data displayed in the invoices route, **you want to clear this cache and trigger a new request to the server**. So you can do this with the `revalidatePath` function from next and then
+Once the database has been updated, the `/dashboard/invoices` path will be revalidated, and fresh data will be fetched from the server.
+
+
+
+
+
+
+
+
+
+
+
+
+[caching](https://nextjs.org/docs/app/guides/caching) 
+
+
+
+
+
 
 
 ## Community Standarts 
