@@ -4,14 +4,26 @@ import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import { useSearchParams,usePathname,useRouter } from 'next/navigation';
 
+import { useDebounce,useDebouncedCallback} from 'use-debounce';
+
+
+
+
 export default function Search({ placeholder }: { placeholder: string }) {
 
   let [input,setInput] = useState("")
+  let [debouncedInput] = useDebounce(input,1000)
+
+
   const searchParams = useSearchParams()
   // console.log(searchParams)
   const pathName = usePathname()
   // console.log(pathName)
 const router = useRouter()
+
+
+//  ! For Adding Debouncing 
+
 
 
   function handleSearch(e:React.ChangeEvent<HTMLInputElement>){
@@ -20,19 +32,27 @@ const router = useRouter()
     const params = new URLSearchParams(searchParams);
     // console.log(params.get('name'))
 
+  handleSearchDebounced(e)
+    
+  }
+
+  const  handleSearchDebounced = useDebouncedCallback((e:React.ChangeEvent<HTMLInputElement>)=>{
+
+    const params = new URLSearchParams(searchParams);
+    // console.log(params.get('name'))
+
     if(e.target.value){
-      params.set('a',e.target.value)    
+      params.set('query',e.target.value)    
 
     }else{
-      params.delete('a')
+      params.delete('query')
     }
     
     console.log(params.toString())
-
+      
     // router.push(`${pathName}?${params.toString()}`)
     router.replace(`${pathName}?${params.toString()}`)
-    
-  }
+  },1000)
 
 
   return (
@@ -46,6 +66,8 @@ const router = useRouter()
         onChange={(e)=>handleSearch(e)}
         value={input}
       />
+      {/* <p> actual value {input}</p>
+      <p> debounced value {debouncedInput}</p> */}
       <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
     </div>
   );
