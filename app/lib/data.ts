@@ -35,7 +35,7 @@ export async function fetchRevenue() {
 export async function fetchLatestInvoices() {
   try {
 
-        console.log('Fetching revenue data...');
+    console.log('Fetching revenue data...');
     await new Promise((resolve) => setTimeout(resolve, 3000));
 
 
@@ -97,6 +97,7 @@ export async function fetchFilteredInvoices(
   query: string,
   currentPage: number,
 ) {
+  // offset used to skip offsetCount of the records 
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   try {

@@ -26,7 +26,7 @@ export default async function Page() {
           value={numberOfCustomers}
           type="customers"
         /> */}
-      <Suspense fallback={<CardsSkeleton/>}>
+        <Suspense fallback={<CardsSkeleton />}>
           <CardWrapper />
 
         </Suspense>

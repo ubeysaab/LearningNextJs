@@ -11,6 +11,7 @@ export default async function InvoicesTable({
   query: string;
   currentPage: number;
 }) {
+  //we need to know the current page in order to define the offset 
   const invoices = await fetchFilteredInvoices(query, currentPage);
 
   return (

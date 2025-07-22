@@ -39,7 +39,10 @@
     - [Deciding where to place your Suspense boundaries](#deciding-where-to-place-your-suspense-boundaries)
   - [Partial PreRendering (PPR)](#partial-prerendering-ppr)
   - [Search and Pagination](#search-and-pagination)
+    - [Why use URL search params](#why-use-url-search-params)
     - [Adding Search Functionality](#adding-search-functionality)
+      - [Debouncing](#debouncing)
+    - [Pagination](#pagination)
   - [Community Standarts](#community-standarts)
   - [Need to look at](#need-to-look-at)
     - [Next.js Server vs Client Components ||  React Server Components. read it then add it to the notes above](#nextjs-server-vs-client-components---react-server-components-read-it-then-add-it-to-the-notes-above)
@@ -534,7 +537,7 @@ Where you place your suspense boundaries will vary depending on your application
 
  *search functionality* will span the client and the server. When a user searches for an invoice on the client, the *URL params* will be updated, data will be fetched on the server, and the table will re-render on the server with the new data.
  > This pattern may be new if you're used to doing it with client side state.
- **Why use URL search params**
+ ### Why use URL search params
  There are a couple of benefits of implementing search with URL params:
 
 - Bookmarkable and shareable URLs: Since the search parameters are in the URL, users can bookmark the current state of the application, including their search queries and filters, for future reference or sharing.
@@ -592,6 +595,35 @@ Update the table to reflect the search query.
  [ ] [Dynamic Route Segments](https://nextjs.org/docs/app/api-reference/file-conventions/dynamic-routes)
 
  [ ] [page.js props](https://nextjs.org/docs/app/api-reference/file-conventions/page)
+
+
+
+
+#### Debouncing 
+In the work that you're have done until now you're **updating the URL on every keystroke, and therefore querying your database on every keystroke !** This isn't a problem as our application is small, but imagine if your application had thousands of users, each sending a new request to your database on each keystroke.
+
+**Debouncing** is a programming practice that limits the rate at which a function can fire. In our case, you only want to query the database when the user has stopped typing.
+
+
+**How Debouncing Works:**
+
+- *Trigger Event:* When an event that should be debounced (like a keystroke in the search box) occurs, a timer starts.
+
+- *Wait:* If a new event occurs before the timer expires, the timer is reset.
+
+- *Execution:* If the timer reaches the end of its countdown, the debounced function is executed.
+
+[use-decounce](https://www.npmjs.com/package/use-debounce) is the package we use to make things simple 
+
+
+> By debouncing, you can reduce the number of requests sent to your database, thus saving resources.
+
+
+
+### Pagination 
+<!-- chapter 11 -->
+
+handled search and pagination with **URL search parameters**instead of **client state**.
 
 
 ## Community Standarts 

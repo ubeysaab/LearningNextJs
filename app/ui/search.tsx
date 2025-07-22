@@ -42,6 +42,7 @@ const router = useRouter()
     // console.log(params.get('name'))
 
     if(e.target.value){
+          params.set('page', '1');
       params.set('query',e.target.value)    
 
     }else{
