@@ -209,3 +209,86 @@ const InvoicePreview = FormSchema.pick({ customer: true, amount: true });
 // Only keeps 'customer' and 'amount'.
 ```
 
+
+
+## promise all
+If you want to run these two async operations **in parallel** (instead of sequentially) for better performance, use `Promise.all()` like this:  
+
+### **Optimized Parallel Execution**
+```javascript
+const [customers, invoice] = await Promise.all([
+  fetchCustomers(),       // Async function 1
+  fetchInvoiceById(id),   // Async function 2
+]);
+```
+
+### **Key Improvements:**
+1. **Faster Execution**:  
+   - Your original code runs sequentially (`await fetchCustomers()` finishes before `fetchInvoiceById()` starts).  
+   - `Promise.all()` runs both async operations **simultaneously**.
+
+2. **Structured Results**:  
+   - Destructures the resolved values into `customers` and `invoice` (same variable names as your original code).  
+
+3. **Error Handling**:  
+   - Add `try/catch` to handle failures in either operation:
+     ```javascript
+     try {
+       const [customers, invoice] = await Promise.all([
+         fetchCustomers(),
+         fetchInvoiceById(id),
+       ]);
+       // Use results here...
+     } catch (error) {
+       console.error("Failed to fetch data:", error);
+     }
+     ```
+
+### **When to Use This?**
+- When the two async tasks are **independent** (no data dependency between them).  
+- When you want to **reduce total wait time** (e.g., loading data for a dashboard).  
+
+### **Alternatives**
+- **Sequential (Original)**: Use if `fetchInvoiceById` depends on `fetchCustomers`.  
+- **`Promise.allSettled()`**: Use if you want to handle partial successes.  
+
+Let me know if you'd like to adapt this for your specific functions! 🚀
+
+----
+
+
+
+## js.bind:
+
+You asked why the code uses:
+
+```ts
+const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
+```
+
+when the function definition is:
+
+```ts
+export async function updateInvoice(id: string, formData: FormData) { ... }
+```
+
+**Key points:**
+
+* `.bind()` is used to **pre-fill** the first argument (`id`) of the function.
+* `null` is passed because the function doesn't use `this`, but `.bind()` still requires a `thisArg`.
+* The result is a new function that only needs `formData`:
+
+  ```ts
+  updateInvoiceWithId(formData); // Equivalent to updateInvoice(invoice.id, formData)
+  ```
+
+**More efficient alternative:**
+
+Instead of using `.bind()`, an arrow function is clearer and avoids unnecessary complexity:
+
+```ts
+const updateInvoiceWithId = (formData: FormData) => updateInvoice(invoice.id, formData);
+```
+
+**Conclusion:**
+Use `.bind()` when you need to fix the `this` context. For simple argument pre-filling (currying), **arrow functions are cleaner and more efficient**.

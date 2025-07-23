@@ -47,9 +47,10 @@
     - [Server Actions](#server-actions)
       - [Create Server Action](#create-server-action)
       - [Extract the data from `formData`](#extract-the-data-from-formdata)
-    - [Validate and Prepare the Data](#validate-and-prepare-the-data)
+      - [Validate and Prepare the Data](#validate-and-prepare-the-data)
       - [Zod (Type Validation and Coercion)](#zod-type-validation-and-coercion)
       - [Revalidate and redirect  `revalidatePath`](#revalidate-and-redirect--revalidatepath)
+      - [Passing Params to the Server actions (pre-filling)](#passing-params-to-the-server-actions-pre-filling)
   - [Community Standarts](#community-standarts)
   - [Need to look at](#need-to-look-at)
     - [Next.js Server vs Client Components ||  React Server Components. read it then add it to the notes above](#nextjs-server-vs-client-components---react-server-components-read-it-then-add-it-to-the-notes-above)
@@ -575,8 +576,8 @@ If you're using state to manage the value of an input, you'd use the `value` att
 However, since you're not using state, you can use `defaultValue`. This means the native input will manage its own state. This is okay since you're saving the search query to the URL instead of state.
 
 
-
-**When to use the useSearchParams() hook vs. the searchParams prop?**
+<!-- table chapter 11 -->
+**When to use the `useSearchParams()` hook vs. the `searchParams` prop?**
 
 You might have noticed you used two different ways to extract search params. Whether you use one or the other depends on whether you're working on the client or the server.
 
@@ -680,7 +681,7 @@ Behind the scenes, Server Actions create a POST API endpoint. This is why you do
 **Tip:** If you're working with forms that have many fields, you may want to consider using the `entries()` method with JavaScript's `Object.fromEntries()`.
 
 
-### Validate and Prepare the Data
+#### Validate and Prepare the Data
 Before sending the form data to your database, you want *to ensure it's in the correct format and with the correct types*. If you remember from earlier in the course, your invoices table expects data in the following format:
 ```ts
 export type Invoice = {
@@ -713,12 +714,21 @@ Once the database has been updated, the `/dashboard/invoices` path will be reval
 
 
 
+#### Passing Params to the Server actions (pre-filling)
+
+Lastly, you want to pass the id to the Server Action so you can update the right record in your database. You cannot pass the `id` as an argument like so
 
 
+```js 
+// Passing an id as argument won't work
+
+<form action={updateInvoice(id)}>
+``` 
+
+Instead, you can pass id to the Server Action using JS `bind`. **This will ensure that any values passed to the Server Action are encoded**.
 
 
-
-
+**Note:** Using a hidden input field in your form also works (e.g. <input type="hidden" name="id" value={invoice.id} />). However, the values will appear as full text in the HTML source, which is not ideal for sensitive data.
 
 
 
