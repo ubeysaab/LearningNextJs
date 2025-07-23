@@ -288,6 +288,12 @@ Instead of using `.bind()`, an arrow function is clearer and avoids unnecessary 
 
 ```ts
 const updateInvoiceWithId = (formData: FormData) => updateInvoice(invoice.id, formData);
+
+
+// this way will be  a cause for errors like this : 
+
+// Error: Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server". Or maybe you meant to call this function rather than return it.
+//   <form action={function deleteInvoice0} children=...>
 ```
 
 **Conclusion:**

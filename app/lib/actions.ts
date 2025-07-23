@@ -1,4 +1,7 @@
 'use server';
+
+
+
 //! By adding the 'use server', you mark all the exported functions within the file as Server Actions. These server functions can then be imported and used in Client and Server components. Any functions included in this file that are not used will be automatically removed from the final application bundle
 import { revalidatePath } from 'next/cache';
 
@@ -95,6 +98,18 @@ export async function updateInvoice(invoiceId: string, formData: FormData) {
   revalidatePath('/dashboard/invoices');
 
   redirect('/dashboard/invoices')
+}
+
+
+export async function deleteInvoiceById(id:string) {
+    await sql`
+  delete from  invoices
+  WHERE id = ${id}
+`;
+
+  revalidatePath('/dashboard/invoices');
+
+//  TODO : ADDING POP UP THAT SHOW THAT PROCESS HAS BEEN SUCCESFULL OR NOT
 }
 
 

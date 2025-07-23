@@ -811,6 +811,8 @@ Use 'use client' only when you need interactivity (like buttons, forms, useState
 
 If you're building the backend yourself, you can skip API calls and query the database directly inside Server Components.
 
+> Server Actions must be async functions.
+
 
 ## Packages 
 https://github.com/porsager/postgres
